@@ -59,7 +59,25 @@ class Ex1Test {
         double[] p1 = Ex1.add(p12, pp2);
         assertTrue(Ex1.equals(p1, po1));
     }
-
+    @Test
+    public void testPoly() {
+        double[] p1 = {2, 0, 3.1, -1.2};
+        assertEquals("-1.2x^3 +3.1x^2 +2.0", Ex1.poly(p1));
+        double[] p2 = {-1.1, 2.3, 3.1};
+        assertEquals("3.1x^2 +2.3x -1.1", Ex1.poly(p2));
+        double[] p3 = {5};
+        assertEquals("5.0", Ex1.poly(p3));
+        double[] p4 = {0, -1};
+        assertEquals("-x", Ex1.poly(p4));
+        double[] p5 = {0, 0, 4};
+        assertEquals("4.0x^2", Ex1.poly(p5));
+        double[] p6 = {0, 0, 0, 0};
+        assertEquals("0", Ex1.poly(p6));
+        double[] p7 = null;
+        assertEquals("0", Ex1.poly(p7));
+        double[] p8 = {};
+        assertEquals("0", Ex1.poly(p8));
+    }
     @Test
     void testMekadem() {
         assertEquals(3, Ex1.Mekadem(new double[]{0, 1, 0, 2}));
@@ -236,7 +254,27 @@ class Ex1Test {
         assertEquals(a3, area, Ex1.EPS);
         assertEquals(a100, area, Ex1.EPS);
     }
-
+    @Test
+    public void testPolynomFromPoints() {
+        double[] xx1 = {0, 2};
+        double[] yy1 = {3, 7};
+        double[] expected1 = {3, 2};
+        double[] res1 = Ex1.PolynomFromPoints(xx1, yy1);
+        assertTrue(Ex1.equals(expected1, res1));
+        double[] xx2 = {0, 1, 2};
+        double[] yy2 = {2, 4, 10};
+        double[] expected2 = {2, 0, 2};
+        double[] res2 = Ex1.PolynomFromPoints(xx2, yy2);
+        assertTrue(Ex1.equals(expected2, res2));
+        double[] xx3 = {0, 1, 2, 3};
+        double[] yy3 = {1, 2, 3, 4};
+        double[] res3 = Ex1.PolynomFromPoints(xx3, yy3);
+        assertNull(res3);
+        double[] xx4 = {0, 1};
+        double[] yy4 = {4};
+        double[] res4 = Ex1.PolynomFromPoints(xx4, yy4);
+        assertNull(res4);
+    }
     @Test
     /**
      * Test the area function.

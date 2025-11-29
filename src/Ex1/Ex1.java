@@ -1,7 +1,6 @@
 package Ex1;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * Introduction to Computer Science 2026, Ariel University,
@@ -81,13 +80,27 @@ public class Ex1 {
         int lx = xx.length;
         int ly = yy.length;
         if (xx != null && yy != null && lx == ly && lx > 1 && lx < 4) {
-            /** add you code below
-
-             /////////////////// */
+            if (lx == 2) {
+                double x1 = xx[0], y1 = yy[0];
+                double x2 = xx[1], y2 = yy[1];
+                double a = (y2 - y1) / (x2 - x1);
+                double b = y1 - a * x1;
+                ans = new double[]{b, a};
+            } else {
+                double x1 = xx[0], y1 = yy[0];
+                double x2 = xx[1], y2 = yy[1];
+                double x3 = xx[2], y3 = yy[2];
+                double denom = (x1 - x2) * (x1 - x3) * (x2 - x3);
+                if (Math.abs(denom) < EPS) return null;
+                double a = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / denom;
+                double b = (x3 * x3 * (y1 - y2) + x2 * x2 * (y3 - y1) + x1 * x1 * (y2 - y3)) / denom;
+                double c = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / denom;
+                ans = new double[]{c, b, a};
+            }
+            ans = removeUnnecessaryZeros(ans);
         }
         return ans;
     }
-
     /**
      * Two polynomials functions are equal if and only if they have the same values f(x) for n+1 values of x,
      * where n is the max degree (over p1, p2) - up to an epsilon (aka EPS) value.
@@ -112,7 +125,6 @@ public class Ex1 {
         }
         return true;
     }
-
     public static int Mekadem(double[] p) {
         for (int i = p.length - 1; i >= 0; i--) {
             if (Math.abs(p[i]) > EPS) {
@@ -121,7 +133,6 @@ public class Ex1 {
         }
         return 0;
     }
-
     public static boolean CheakTwoArrysLeangth(double[] arr1, double[] arr2) {
         if (arr1.length == arr2.length) {
             return true;
@@ -129,7 +140,6 @@ public class Ex1 {
         return false;
 
     }
-
     public static double[] removeUnnecessaryZeros(double[] arr) {
         if (polinomZero(arr)) {
             return new double[]{0};
@@ -148,7 +158,6 @@ public class Ex1 {
         }
         return ans;
     }
-
     public static boolean polinomZero(double[] p1) {
         if (p1 == null || p1.length == 0) {
             return false;
@@ -169,14 +178,31 @@ public class Ex1 {
      * @return String representing the polynomial function:
      */
     public static String poly(double[] poly) {
+        if (poly == null || poly.length == 0) return "0";
         String ans = "";
-        if (poly.length == 0) {
-            ans = "0";
-        } else {
-            /** add you code below
-
-             /////////////////// */
+        boolean first = true;
+        for (int i = poly.length - 1; i >= 0; i--) {
+            double coef = poly[i];
+            if (Math.abs(coef) < EPS) continue;
+            if (!first) {
+                if (coef >= 0) ans += " +";
+                else ans += " -";
+            } else {
+                if (coef < 0) ans += "-";
+                first = false;
+            }
+            double c = Math.abs(coef);
+            if (i == 0) {
+                ans += c;
+            } else if (i == 1) {
+                if (c != 1) ans += c;
+                ans += "x";
+            } else {
+                if (c != 1) ans += c;
+                ans += "x^" + i;
+            }
         }
+        if (ans.equals("")) return "0";
         return ans;
     }
 
@@ -227,10 +253,18 @@ public class Ex1 {
      * @return the length approximation of the function between f(x1) and f(x2).
      */
     public static double length(double[] p, double x1, double x2, int numberOfSegments) {
-        double ans = x1;
-        /** add you code below
-
-         /////////////////// */
+        double ans = 0;
+        if (p == null || numberOfSegments <= 0 || x1 >= x2) return -1;
+        double segment = (x2 - x1) / numberOfSegments;
+        double x = x1;
+        double y = f(p, x);
+        for (int i = 1; i <= numberOfSegments; i++) {
+            double xCurr = x1 + i * segment;
+            double yCurr = f(p, xCurr);
+            ans += Math.sqrt(Math.pow(xCurr - x, 2) + Math.pow(yCurr - y, 2));
+            x = xCurr;
+            y = yCurr;
+        }
         return ans;
     }
 
@@ -248,9 +282,15 @@ public class Ex1 {
      */
     public static double area(double[] p1, double[] p2, double x1, double x2, int numberOfTrapezoid) {
         double ans = 0;
-        /** add you code below
-
-         /////////////////// */
+        if (p1 == null || p2 == null || numberOfTrapezoid <= 0 || x2 <= x1) return -1;
+        double width = (x2 - x1) / numberOfTrapezoid;
+        for (int i = 0; i < numberOfTrapezoid; i++) {
+            double xA = x1 + i * width;
+            double xB = x1 + (i + 1) * width;
+            double yA = Math.abs(f(p1, xA) - f(p2, xA));
+            double yB = Math.abs(f(p1, xB) - f(p2, xB));
+            ans += width * (yA + yB) / 2.0;
+        }
         return ans;
     }
 
@@ -264,9 +304,53 @@ public class Ex1 {
      */
     public static double[] getPolynomFromString(String p) {
         double[] ans = ZERO;//  -1.0x^2 +3.0x +2.0
-        /** add you code below
-
-         /////////////////// */
+        if (p == null) return new double[]{0};
+        p = p.replace(" ", "");
+        if (p.length() == 0) return new double[]{0};
+        if (p.charAt(0) != '-') p = "+" + p;
+        int maxPow = 0;
+        for (int i = 0; i < p.length(); i++) {
+            if (p.charAt(i) == '^') {
+                int pow = 0;
+                int j = i + 1;
+                while (j < p.length() && Character.isDigit(p.charAt(j))) {
+                    pow = pow * 10 + (p.charAt(j) - '0');
+                    j++;
+                }
+                if (pow > maxPow) maxPow = pow;
+            } else if (p.charAt(i) == 'x') {
+                if (maxPow < 1) maxPow = 1;
+            }
+        }
+        ans = new double[maxPow + 1];
+        int i = 0;
+        while (i < p.length()) {
+            char sign = p.charAt(i++);
+            double coef = 0;
+            boolean hasDigit = false;
+            while (i < p.length() &&
+                    (Character.isDigit(p.charAt(i)) || p.charAt(i) == '.')) {
+                hasDigit = true;
+                coef = coef * 10 + (p.charAt(i) - '0');
+                i++;
+            }
+            if (!hasDigit) coef = 1;
+            if (sign == '-') coef = -coef;
+            int pow = 0;
+            if (i < p.length() && p.charAt(i) == 'x') {
+                pow = 1;
+                i++;
+                if (i < p.length() && p.charAt(i) == '^') {
+                    i++;
+                    pow = 0;
+                    while (i < p.length() && Character.isDigit(p.charAt(i))) {
+                        pow = pow * 10 + (p.charAt(i) - '0');
+                        i++;
+                    }
+                }
+            }
+            ans[pow] += coef;
+        }
         return ans;
     }
 
@@ -279,9 +363,15 @@ public class Ex1 {
      */
     public static double[] add(double[] p1, double[] p2) {
         double[] ans = ZERO;//
-        /** add you code below
-
-         /////////////////// */
+        if (p1 == null || p2 == null) return ans;
+        int max = Math.max(p1.length, p2.length);
+        ans = new double[max];
+        for (int i = 0; i < max; i++) {
+            double a = i < p1.length ? p1[i] : 0;
+            double b = i < p2.length ? p2[i] : 0;
+            ans[i] = a + b;
+        }
+        ans = removeUnnecessaryZeros(ans);
         return ans;
     }
 
@@ -293,10 +383,15 @@ public class Ex1 {
      * @return
      */
     public static double[] mul(double[] p1, double[] p2) {
-        double[] ans = ZERO;//
-        /** add you code below
-
-         /////////////////// */
+        double[] ans = ZERO;
+        if (p1 == null || p2 == null) return ans;
+        ans = new double[p1.length + p2.length - 1];
+        for (int i = 0; i < p1.length; i++) {
+            for (int j = 0; j < p2.length; j++) {
+                ans[i + j] += p1[i] * p2[j];
+            }
+        }
+        ans = removeUnnecessaryZeros(ans);
         return ans;
     }
 
@@ -307,10 +402,12 @@ public class Ex1 {
      * @return
      */
     public static double[] derivative(double[] po) {
-        double[] ans = ZERO;//
-        /** add you code below
-
-         /////////////////// */
+        double[] ans = ZERO;
+        if (po == null || po.length == 1) return ans;
+        ans = new double[po.length - 1];
+        for (int i = 1; i < po.length; i++) {
+            ans[i - 1] = i * po[i];
+        }
         return ans;
     }
 
@@ -322,6 +419,12 @@ public class Ex1 {
         double[] p2 = {0};
         double ans = sameValue(p1, p2, 0, 1, EPS);
         System.out.println(ans);
+        double[] p5 = {0, 1};
+        double len = length(p5, 0, 10, 10000);
+        System.out.println(len);
+        double[] p6 = {2, -3, 5};
+        double[] nigzeret = derivative(p6);
+        System.out.println(Arrays.toString(nigzeret));
 
     }
 }
