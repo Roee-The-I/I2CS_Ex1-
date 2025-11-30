@@ -67,12 +67,13 @@ public class Ex1 {
     }
 
     /**
-     * This function computes a polynomial representation from a set of 2D points on the polynom.
-     * The solution is based on: //	http://stackoverflow.com/questions/717762/how-to-calculate-the-vertex-of-a-parabola-given-three-points
-     * Note: this function only works for a set of points containing up to 3 points, else returns null.
+     * This function creates a polynomial that exactly fits a given set of 2D points.
+     * It supports:
+     * 2 points → returns a linear polynomial (degree 1)
+     * 3 points → returns a quadratic polynomial (degree 2)
      *
-     * @param xx
-     * @param yy
+     * @param xx double[]
+     * @param yy double[]
      * @return an array of doubles representing the coefficients of the polynom.
      */
     public static double[] PolynomFromPoints(double[] xx, double[] yy) {
@@ -101,12 +102,13 @@ public class Ex1 {
         }
         return ans;
     }
+
     /**
-     * Two polynomials functions are equal if and only if they have the same values f(x) for n+1 values of x,
-     * where n is the max degree (over p1, p2) - up to an epsilon (aka EPS) value.
+     * This function checks whether two polynomials represent the same mathematical polynomial function.
+     * It compares their coefficients after removing unnecessary trailing zeros.
      *
-     * @param p1 first polynomial function
-     * @param p2 second polynomial function
+     * @param p1 first polynomial function double[]
+     * @param p2 second polynomial function double[]
      * @return true iff p1 represents the same polynomial function as p2.
      */
     public static boolean equals(double[] p1, double[] p2) {
@@ -125,6 +127,14 @@ public class Ex1 {
         }
         return true;
     }
+
+    /**
+     * This function determines the degree of a polynomial based on its coefficients.
+     * The degree is the highest index in the array whose value is not zero.
+     *
+     * @param p double[]
+     * @return The degree of the polynomial
+     */
     public static int Mekadem(double[] p) {
         for (int i = p.length - 1; i >= 0; i--) {
             if (Math.abs(p[i]) > EPS) {
@@ -133,13 +143,14 @@ public class Ex1 {
         }
         return 0;
     }
-    public static boolean CheakTwoArrysLeangth(double[] arr1, double[] arr2) {
-        if (arr1.length == arr2.length) {
-            return true;
-        }
-        return false;
 
-    }
+    /**
+     * This function removes trailing zeros from a polynomial’s coefficient array.
+     * Trailing zeros do not change the value of the polynomial.
+     *
+     * @param arr double[]
+     * @return The function returns a new array with those extra zeros removed.
+     */
     public static double[] removeUnnecessaryZeros(double[] arr) {
         if (polinomZero(arr)) {
             return new double[]{0};
@@ -158,6 +169,15 @@ public class Ex1 {
         }
         return ans;
     }
+
+    /**
+     * This function checks whether a given polynomial is the zero polynomial.
+     * A zero polynomial is a polynomial where all coefficients are equal to zero (or very close to zero within a small tolerance)
+     *
+     * @param p1 double[]
+     *           The array of polynomial coefficients. Index represents the power of x.
+     * @return true or false
+     */
     public static boolean polinomZero(double[] p1) {
         if (p1 == null || p1.length == 0) {
             return false;
@@ -173,7 +193,6 @@ public class Ex1 {
     /**
      * Computes a String representing the polynomial function.
      * For example the array {2,0,3.1,-1.2} will be presented as the following String  "-1.2x^3 +3.1x^2 +2.0"
-     *
      * @param poly the polynomial function represented as an array of doubles
      * @return String representing the polynomial function:
      */
@@ -195,16 +214,18 @@ public class Ex1 {
             if (i == 0) {
                 ans += c;
             } else if (i == 1) {
-                if (c != 1) ans += c;
-                ans += "x";
+                ans += c + "x";
             } else {
-                if (c != 1) ans += c;
+                if (c != 1) {
+                    ans += c;
+                }
                 ans += "x^" + i;
             }
         }
         if (ans.equals("")) return "0";
         return ans;
     }
+
 
     /**
      * Given two polynomial functions (p1,p2), a range [x1,x2] and an epsilon eps. This function computes an x value (x1<=x<=x2)
@@ -269,9 +290,7 @@ public class Ex1 {
     }
 
     /**
-     * Given two polynomial functions (p1,p2), a range [x1,x2] and an integer representing the number of Trapezoids between the functions (number of samples in on each polynom).
-     * This function computes an approximation of the area between the polynomial functions within the x-range.
-     * The area is computed using Riemann's like integral (https://en.wikipedia.org/wiki/Riemann_integral)
+     * This function estimates the area between two curves represented by the polynomials p1 and p2, over the interval from x1 to x2.
      *
      * @param p1                - first polynomial function
      * @param p2                - second polynomial function
@@ -300,66 +319,114 @@ public class Ex1 {
      * getPolynomFromString(poly(p)) should return an array equals to p.
      *
      * @param p - a String representing polynomial function.
-     * @return
+     * @return Polynomial coefficients where index = exponent
      */
     public static double[] getPolynomFromString(String p) {
-        double[] ans = ZERO;//  -1.0x^2 +3.0x +2.0
-        if (p == null) return new double[]{0};
-        p = p.replace(" ", "");
-        if (p.length() == 0) return new double[]{0};
-        if (p.charAt(0) != '-') p = "+" + p;
+        p = normalize(p);
+        if (p.equals("")) return new double[]{0};
+
+        int max = extractMaxPower(p);
+        double[] ans = new double[max + 1];
+
+        int[] iRef = {0};
+        while (iRef[0] < p.length()) {
+            double coef = parseCoef(p, iRef);
+            int pow = parsePow(p, iRef);
+            ans[pow] += coef;
+        }
+        ans = removeUnnecessaryZeros(ans);
+        return ans;
+    }
+
+    /**
+     * This function prepares a polynomial string for parsing or further processing.
+     * It removes spaces and ensures that the expression starts with either a + or - sign.
+     * @param s String
+     * @return A string representing a polynomial expression
+     */
+    public static String normalize(String s) {
+        if (s == null) return "";
+        s = s.replace(" ", "");
+        if (s.length() == 0) return "";
+        if (s.charAt(0) != '-') s = "+" + s;
+        return s;
+    }
+
+    /**
+     * This function scans a polynomial string and finds the highest power of x that appears in the expression.
+     * It helps determine the degree of the polynomial before parsing its coefficients.
+     * @param s String
+     * @return A polynomial expression in text form
+     */
+    public static int extractMaxPower(String s) {
         int maxPow = 0;
-        for (int i = 0; i < p.length(); i++) {
-            if (p.charAt(i) == '^') {
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == '^') {
                 int pow = 0;
                 int j = i + 1;
-                while (j < p.length() && Character.isDigit(p.charAt(j))) {
-                    pow = pow * 10 + (p.charAt(j) - '0');
+                while (j < s.length() && Character.isDigit(s.charAt(j))) {
+                    pow = pow * 10 + (s.charAt(j) - '0');
                     j++;
                 }
                 if (pow > maxPow) maxPow = pow;
-            } else if (p.charAt(i) == 'x') {
+            } else if (s.charAt(i) == 'x') {
                 if (maxPow < 1) maxPow = 1;
             }
         }
-        ans = new double[maxPow + 1];
-        int i = 0;
-        while (i < p.length()) {
-            char sign = p.charAt(i++);
-            double coef = 0;
-            boolean hasDigit = false;
-            while (i < p.length() &&
-                    (Character.isDigit(p.charAt(i)) || p.charAt(i) == '.')) {
-                hasDigit = true;
-                coef = coef * 10 + (p.charAt(i) - '0');
+        return maxPow;
+    }
+
+    /**
+     * This function reads and extracts the power (exponent) of the variable x from a polynomial string while parsing it.
+     * @param s string
+     * @param iRef int[]
+     * @return x without a power (e.g., "x" or "3x") and Power explicitly defined (e.g., "x^7")
+     */
+    public static int parsePow(String s, int[] iRef) {
+        int i = iRef[0];
+        int pow = 0;
+        if (i < s.length() && s.charAt(i) == 'x') {
+            pow = 1;
+            i++;
+            if (i < s.length() && s.charAt(i) == '^') {
                 i++;
-            }
-            if (!hasDigit) coef = 1;
-            if (sign == '-') coef = -coef;
-            int pow = 0;
-            if (i < p.length() && p.charAt(i) == 'x') {
-                pow = 1;
-                i++;
-                if (i < p.length() && p.charAt(i) == '^') {
+                pow = 0;
+                while (i < s.length() && Character.isDigit(s.charAt(i))) {
+                    pow = pow * 10 + (s.charAt(i) - '0');
                     i++;
-                    pow = 0;
-                    while (i < p.length() && Character.isDigit(p.charAt(i))) {
-                        pow = pow * 10 + (p.charAt(i) - '0');
-                        i++;
-                    }
                 }
             }
-            ans[pow] += coef;
         }
-        return ans;
+        iRef[0] = i;
+        return pow;
+    }
+
+    /**
+     * This function extracts the coefficient of a polynomial term from a string while parsing.
+     * @param s String
+     * @param iRef int[]
+     * @return The numeric coefficient for the term
+     */
+    public static double parseCoef(String s, int[] iRef) {
+        int i = iRef[0];
+        char sign = s.charAt(i++);
+        StringBuilder num = new StringBuilder();
+        while (i < s.length() && (Character.isDigit(s.charAt(i)) || s.charAt(i) == '.')) {
+            num.append(s.charAt(i));
+            i++;
+        }
+        double coef = (num.length() > 0) ? Double.parseDouble(num.toString()) : 1.0;
+        if (sign == '-') coef = -coef;
+        iRef[0] = i;
+        return coef;
     }
 
     /**
      * This function computes the polynomial function which is the sum of two polynomial functions (p1,p2)
      *
-     * @param p1
-     * @param p2
-     * @return
+     * @param p1 double[]
+     * @param p2 double[]
+     * @return A new polynomial array representing p1 + p2
      */
     public static double[] add(double[] p1, double[] p2) {
         double[] ans = ZERO;//
@@ -377,10 +444,10 @@ public class Ex1 {
 
     /**
      * This function computes the polynomial function which is the multiplication of two polynoms (p1,p2)
-     *
-     * @param p1
-     * @param p2
-     * @return
+     * It multiplies two polynomials using coefficient convolution and returns the resulting polynomial.
+     * @param p1 double[]
+     * @param p2 double[]
+     * @return The polynomial representing p1 * p2
      */
     public static double[] mul(double[] p1, double[] p2) {
         double[] ans = ZERO;
@@ -397,9 +464,8 @@ public class Ex1 {
 
     /**
      * This function computes the derivative of the p0 polynomial function.
-     *
-     * @param po
-     * @return
+     * @param po double[]
+     * @return The coefficients of the derivative polynomial
      */
     public static double[] derivative(double[] po) {
         double[] ans = ZERO;

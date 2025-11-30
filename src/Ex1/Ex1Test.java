@@ -2,6 +2,8 @@ package Ex1;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -59,6 +61,7 @@ class Ex1Test {
         double[] p1 = Ex1.add(p12, pp2);
         assertTrue(Ex1.equals(p1, po1));
     }
+
     @Test
     public void testPoly() {
         double[] p1 = {2, 0, 3.1, -1.2};
@@ -68,7 +71,7 @@ class Ex1Test {
         double[] p3 = {5};
         assertEquals("5.0", Ex1.poly(p3));
         double[] p4 = {0, -1};
-        assertEquals("-x", Ex1.poly(p4));
+        assertEquals("-1.0x", Ex1.poly(p4));
         double[] p5 = {0, 0, 4};
         assertEquals("4.0x^2", Ex1.poly(p5));
         double[] p6 = {0, 0, 0, 0};
@@ -78,6 +81,7 @@ class Ex1Test {
         double[] p8 = {};
         assertEquals("0", Ex1.poly(p8));
     }
+
     @Test
     void testMekadem() {
         assertEquals(3, Ex1.Mekadem(new double[]{0, 1, 0, 2}));
@@ -101,9 +105,9 @@ class Ex1Test {
 
     @Test
     void testpolinomZero() {
-    assertTrue(Ex1.polinomZero(new double[]{0, 0, 0, 0}));
-    assertFalse(Ex1.polinomZero(new double[]{4, 2, 1,4,8,8,24,0,0,0,0}));
-    assertFalse(Ex1.polinomZero(new double[]{0,0,0,0,0.55,0,0,0,0,0}));
+        assertTrue(Ex1.polinomZero(new double[]{0, 0, 0, 0}));
+        assertFalse(Ex1.polinomZero(new double[]{4, 2, 1, 4, 8, 8, 24, 0, 0, 0, 0}));
+        assertFalse(Ex1.polinomZero(new double[]{0, 0, 0, 0, 0.55, 0, 0, 0, 0, 0}));
     }
 
     @Test
@@ -188,6 +192,9 @@ class Ex1Test {
         double[] p2 = Ex1.getPolynomFromString(sp2);
         boolean isSame1 = Ex1.equals(p1, p);
         boolean isSame2 = Ex1.equals(p2, p);
+        System.out.println("sp:  " + sp);
+        System.out.println("p1:  " + Arrays.toString(p1));
+        System.out.println("poly(p1): " + Ex1.poly(p1));
         if (!isSame1) {
             fail();
         }
@@ -195,6 +202,38 @@ class Ex1Test {
             fail();
         }
         assertEquals(sp, Ex1.poly(p1));
+    }
+
+    @Test
+    public void testNormalize() {
+        assertEquals("", Ex1.normalize(null));
+        assertEquals("", Ex1.normalize(""));
+        assertEquals("+3.1x^2+2.3x-1.1", Ex1.normalize("3.1x^2 +2.3x -1.1"));
+        assertEquals("-2x", Ex1.normalize("-2x"));
+    }
+
+    @Test
+    public void testExtractMaxPower() {
+        assertEquals(2, Ex1.extractMaxPower("+3.1x^2+2.3x-1.1"));
+        assertEquals(1, Ex1.extractMaxPower("+5x-3"));
+        assertEquals(0, Ex1.extractMaxPower("+7"));
+    }
+
+    @Test
+    public void testParseCoef() {
+        int[] idx;
+
+        idx = new int[]{0};
+        assertEquals(3.1, Ex1.parseCoef("+3.1x", idx), Ex1.EPS);
+
+        idx = new int[]{0};
+        assertEquals(-2.5, Ex1.parseCoef("-2.5x", idx), Ex1.EPS);
+
+        idx = new int[]{0};
+        assertEquals(1, Ex1.parseCoef("+x", idx), Ex1.EPS);
+
+        idx = new int[]{0};
+        assertEquals(-1, Ex1.parseCoef("-x", idx), Ex1.EPS);
     }
 
     @Test
@@ -254,6 +293,7 @@ class Ex1Test {
         assertEquals(a3, area, Ex1.EPS);
         assertEquals(a100, area, Ex1.EPS);
     }
+
     @Test
     public void testPolynomFromPoints() {
         double[] xx1 = {0, 2};
@@ -275,6 +315,7 @@ class Ex1Test {
         double[] res4 = Ex1.PolynomFromPoints(xx4, yy4);
         assertNull(res4);
     }
+
     @Test
     /**
      * Test the area function.
